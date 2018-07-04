@@ -58,7 +58,7 @@ func (a *GelfAdapter) Stream(logstream chan *router.Message) {
 			ContainerCmd:   strings.Join(m.Container.Config.Cmd," "),
 			ImageId:        m.Container.Image,
 			ImageName:      m.Container.Config.Image,
-			ContainerState: _status,
+			ContainerState: string(_status[:]),
 		}
 
 		if m.Source == "stdout" {
