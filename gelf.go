@@ -46,10 +46,11 @@ func NewGelfAdapter(route *router.Route) (router.LogAdapter, error) {
 // Stream implements the router.LogAdapter interface.
 func (a *GelfAdapter) Stream(logstream chan *router.Message) {
 	for m := range logstream {
+		_status, _ := json.Marshal(m.Container.State)
 
 		msg := GelfMessage{
 			Version:        "1.1",
-      			Host:           hostname, // Running as a container cannot discover the Docker Hostname
+			Host:           hostname, // Running as a container cannot discover the Docker Hostname
 			ShortMessage:   m.Data,
 			Timestamp:      m.Time.Format(time.RFC3339Nano),
 			ContainerId:    m.Container.ID,
@@ -57,12 +58,13 @@ func (a *GelfAdapter) Stream(logstream chan *router.Message) {
 			ContainerCmd:   strings.Join(m.Container.Config.Cmd," "),
 			ImageId:        m.Container.Image,
 			ImageName:      m.Container.Config.Image,
+			ContainerState: _status,
 		}
 
 		if m.Source == "stdout" {
-      			msg.Level = 3
-    		}
-    		
+			msg.Level = 3
+		}
+
     		if m.Source == "stderr" {
     			msg.Level = 6
 		}
@@ -93,5 +95,6 @@ type GelfMessage struct {
 	ContainerId    string `json:"container_id,omitempty"`
 	ContainerName  string `json:"container_name,omitempty"`
 	ContainerCmd   string `json:"command,omitempty"`
+	ContainerState string `json:"container_state,omitempty"`
 }
 
